@@ -1,0 +1,12 @@
+Package: ReadMatrixRcpp
+Type: Package
+Title: ReadMatrixRcpp
+Version: 1.3
+Date: 2017-03-13
+Author: Tod Casasent <tdcasasent@mdanderson.org>
+Maintainer: Keith Baggerly <kabagger@mdanderson.org>
+Description: Read large matrix files using C++
+Depends: Rcpp
+License: GPL (>= 2)
+Imports: Rcpp (>= 0.12.4)
+LinkingTo: Rcpp

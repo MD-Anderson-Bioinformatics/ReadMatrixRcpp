@@ -1,0 +1,67 @@
+# some explanation here taken from
+# https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
+# https://cran.r-project.org/doc/manuals/r-release/R-exts.html
+# especially http://www.hep.by/gnu/r-patched/r-admin/R-admin_81.html
+
+# Tell R to compile with a particular version of g++. This is needed because we use some C++11 code and it keeps the version consistent.
+CXX = g++-4.8.1
+
+# Tell g++ to use C++11 extensions.
+PKG_CXXFLAGS = -std=c++11
+
+# Pre-processor flag: (-I) include the make-able C library (libzip) in the src/libzip-1.1.2 directory.
+PKG_CFLAGS = -I./libzip-1.1.2
+
+# Pre-processor flag: (-I) include the make-able CPP library (libzippp) in the src/libzippp directory.
+PKG_CXXCPPFLAGS = -I./libzippp
+
+# Locations for Compiler to invoke Linker for a particular directory.
+# do a link (-L) within the src/libzip-1.1.2 and libzippp directories
+# needed since these directories contain source code libraries compiled for this code
+PKG_LDFLAGS = -L./libzip-1.1.2/lib -L./libzippp
+
+# Linker flag to include the src/libzipp/libzippp.a library and src/libzip-1.1.2/lib/.libs/libzip.a library and the system libz library
+# The -lz is needed by libzip-1.1.2
+PKG_LIBS = ./libzippp/libzippp.a ./libzip-1.1.2/lib/.libs/libzip.a -lz
+
+# Target for SHared LIBrary for R SHLIB build
+$(SHLIB): libzip-1.1.2/lib/.libs/libzip.a libzippp/libzippp.a
+
+# libzip C target
+# switch to the libzip-1.1.2 directory
+# run configure
+# then make with
+# CC: passed from R. Program for compiling C files
+# CFLAGS: passed from R. Extra flags for C compiler
+# CPICFLAGS: passed from R. "special flags for compiling C code to be turned into a shared object"
+# AR: passed from R. "Archive-maintaining program". Used by make.
+#     This converts dynamic object (.o) files into fixed .a library files
+# RANLIB: passed from R. Program to build index to make static library faster
+libzip-1.1.2/lib/.libs/libzip.a:
+	@(cd libzip-1.1.2 && ./configure && $(MAKE) \
+	  CC="$(CC)" CFLAGS="$(CFLAGS) $(CPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+
+# libzippp C++ target
+# switch to the libzip-1.1.2 directory
+# then make with
+# CXX: passed from R. Program for compiling C++ files
+# CXXFLAGS: passed from R. Extra flags for C++ compiler
+# AR: passed from R. "Archive-maintaining program". Used by make.
+#     This converts dynamic object (.o) files into fixed .a library files
+# RANLIB: passed from R. Program to build index to make static library faster
+libzippp/libzippp.a:
+	@(cd libzippp && $(MAKE) \
+	  CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
+
+# Cleaning target
+# two colons mean this is adding onto existing clean target
+# first, in the src/libzip-1.1.2 directory do make distclean
+#        This is a specific target for libzip that cleans out all dist/built libraries
+# second, in the src/libzippp directory do make clean
+#        This cleans out all dist/built libraries
+# this, remove all .so and .o directories in src
+clean::
+	@(cd libzip-1.1.2 && $(MAKE) distclean )
+	@(cd libzippp && $(MAKE) clean )
+	@( rm *.so *.o )
+

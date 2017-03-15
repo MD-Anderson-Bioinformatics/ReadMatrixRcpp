@@ -1,0 +1,19 @@
+#!/bin/bash
+echo "start cleanup"
+
+baseDir=`pwd`
+echo baseDir=${baseDir}
+
+echo "clean libzip-1.1.2"
+cd ${baseDir}/src/libzip-1.1.2
+make distclean
+
+echo "clean libzippp"
+cd ${baseDir}/src/libzippp
+
+echo "clean src"
+cd ${baseDir}/src
+rm *.so *.o
+
+echo "complete cleanup"
+
